@@ -227,8 +227,11 @@ const Donors = () => {
                   <p className="mb-0">
                     <span className="fw-semibold">Phone Number:</span> {donor.phone}
                   </p>
-                  <p className="mb-0 mt-2 text-danger fw-semibold">Donation Fee: KSh 1400</p>
-                  <span className="mt-2 d-inline-block text-success fw-semibold marginRight = '50px">Available</span> <br />
+                  <p className="mb-0 mt-2 text-danger fw-semibold">Service Fee: KSh 100</p>
+                  <span className="mt-2 d-inline-block text-success fw-semibold" style={{ marginRight: '50px' }}>
+                    Available
+                  </span>
+                  <br />
                   <Link
                     to="/schedule-donation"
                     state={{

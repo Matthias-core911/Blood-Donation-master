@@ -10,7 +10,7 @@ const ScheduleDonation = () => {
     date: "",
     time: "",
     notes: "",
-    amount: singleproduct?.product_cost || 1400,
+    amount: singleproduct?.product_cost || 100,
   });
   const [response, setResponse] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,8 +23,8 @@ const ScheduleDonation = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (Number(schedule.amount) < 1400) {
-      setError("Minimum donation support amount is KSh 1400.");
+    if (Number(schedule.amount) < 100) {
+      setError("Minimum service fee amount is KSh 100.");
       return;
     }
     setIsSubmitting(true);
@@ -95,14 +95,14 @@ const ScheduleDonation = () => {
             <div className="col-md-6">
               <input
                 type="number"
-                min="1400"
+                min="100"
                 name="amount"
                 className="form-control bdn-input"
                 value={schedule.amount}
                 onChange={onChange}
                 required
               />
-              <small className="text">Minimum required: KSh 1400</small>
+              <small className="text">Minimum required: KSh 100</small>
             </div>
             <div className="col-md-6">
               <input

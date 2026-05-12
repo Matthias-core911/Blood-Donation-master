@@ -102,32 +102,19 @@ const Mpesapayment = () => {
               <b className="text-danger text-start d-block">
                 KSh {singleproduct.product_cost} (base amount)
               </b>
-              <small className="d-block  mb-2">
-                Minimum required: KSh 1400. You can add extra support.
-              </small>
+              
               <br />
               <h4 className="text-warning">{loading}</h4>
               <h4 className="text-success">{success}</h4>
               {reference && <p className="small mb-2">Reference: {reference}</p>}
               <h4 className="text-danger">{error}</h4>
               <form onSubmit={handlesubmit}>
-                <div className="d-flex flex-wrap gap-2 mb-2 ">
-                  {[1400, 2000, 3000].map((preset) => (
-                    <button
-                      type="button"
-                      key={preset}
-                      className="btn btn-sm btn-outline-danger"
-                      onClick={() => setAmount(preset)}
-                    >
-                      KSh {preset}
-                    </button>
-                  ))}
-                </div>
+                
                 <input
                   type="number"
                   className="form-control bdn-input"
-                  min="1400"
-                  placeholder="Custom amount (min 1400)"
+                  
+                  placeholder="Custom amount (min 100)"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
