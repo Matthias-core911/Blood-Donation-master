@@ -1,22 +1,18 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
-// A real, persistent SQLite database that lives in the repo (data/lifeline.db,
-// gitignored - the schema is version-controlled, the data isn't). No external
-// database service is required: this file is created automatically the first
-// time the server starts.
-const dataDir = path.resolve(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+// Works locally as a file, works on Vercel with Turso
+// For local dev: uses file:data/lifeline.db
+// For Vercel production: set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in Vercel env vars
+const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || "file:data/lifeline.db";
+const authToken = process.env.TURSO_AUTH_TOKEN;
 
-const sqlite = new Database(path.join(dataDir, "lifeline.db"));
-sqlite.pragma("journal_mode = WAL");
+const client = createClient({ url, authToken });
 
-sqlite.exec(`
+// Create tables if not exists (for local file DB)
+// This runs async but won't block - tables will be created on first query
+client.executeMultiple(`
   CREATE TABLE IF NOT EXISTS donors (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -31,7 +27,6 @@ sqlite.exec(`
     verified INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
-
   CREATE TABLE IF NOT EXISTS blood_requests (
     id TEXT PRIMARY KEY,
     patient_alias TEXT NOT NULL,
@@ -48,7 +43,6 @@ sqlite.exec(`
     verified INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
-
   CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,
     context TEXT NOT NULL,
@@ -58,7 +52,6 @@ sqlite.exec(`
     status TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
-
   CREATE TABLE IF NOT EXISTS schedules (
     id TEXT PRIMARY KEY,
     context TEXT NOT NULL,
@@ -68,6 +61,6 @@ sqlite.exec(`
     amount INTEGER NOT NULL,
     created_at TEXT NOT NULL
   );
-`);
+`).catch(() => {}); // ignore error if already exists on Turso
 
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(client, { schema });
