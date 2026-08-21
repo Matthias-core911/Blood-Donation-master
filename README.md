@@ -1,71 +1,72 @@
-# Getting Started with Create React App
+# Lifeline - Blood Donation Network
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The real Lifeline design (built in Lovable - TanStack Start, TypeScript,
+Tailwind) now backed by a real database, real password hashing, and a
+real M-Pesa integration. Nothing about the design changed; everything
+about how it stores and moves data did.
 
-## Available Scripts
+## What's real here
 
-In the project directory, you can run:
+- **Database**: SQLite, via Drizzle ORM (`src/db/schema.ts`,
+  `src/db/client.ts`). Created automatically on first run in `data/`
+  (gitignored - the schema is version-controlled, the data isn't).
+- **Auth**: passwords are hashed with bcrypt before they ever touch disk.
+  Registration checks for duplicate phone numbers against the database,
+  not a mock array.
+- **Server functions** (`src/rpc/`): registration, sign-in, publishing
+  requests, pledging to donate, scheduling, network stats, and the M-Pesa
+  payment call all run server-side via TanStack Start's server functions -
+  the browser never talks to the M-Pesa endpoint or the database directly.
+- **Everything else** - every page, component, and pixel - is the actual
+  Lovable-generated output. No screenshots were used as a reference; this
+  is the real source.
 
-### `npm start`
+## Getting started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+npm run dev       # local dev server - the database file is created
+                   # automatically the first time you register a donor
+npm run build     # production build (Node.js server target)
+npm run preview   # preview the production build locally
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+No environment variables or external services are required to run this
+locally - the database is a file, and the M-Pesa endpoint is the same
+public one the original app used.
 
-### `npm test`
+## Deployment note
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This builds to a standard Node.js server (`node-server` nitro preset),
+not an edge/Workers target - SQLite via `better-sqlite3` is a native Node
+addon and can't run in edge runtimes like Cloudflare Workers (no
+filesystem, no native bindings there). If you later want to deploy to an
+edge platform, swap the database for something edge-compatible (e.g.
+Turso/libSQL or a hosted Postgres) rather than changing the nitro preset
+back.
 
-### `npm run build`
+## Data model
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Table | Purpose |
+|---|---|
+| `donors` | Registered donors - name, hashed password, blood type, county/area, availability |
+| `blood_requests` | Published requests - patient alias, blood type, units needed/pledged, urgency |
+| `payments` | M-Pesa payment records - amount, phone, reference, status |
+| `schedules` | Booked donation appointments - centre, date, time, fee |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`src/lib/blood.ts` is the client-facing API surface every route imports -
+it calls the server functions in `src/rpc/` under the hood. Client-side
+session state (who's using this browser right now) is a lightweight
+`localStorage` marker with no password in it - real credential checks
+always happen server-side against the database.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Notes
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# BloodDonation
+- Still a single-server prototype: no user roles, no rate limiting, no
+  session tokens/cookies (the client just remembers a name + phone after
+  a successful sign-in, same UX as the original app, but the actual
+  verification is now real).
+- The M-Pesa integration calls the same third-party demo endpoint the
+  original Blood-Donation-master app used
+  (`matthiashiggs.alwaysdata.net`) - swap this for real Safaricom Daraja
+  API credentials before handling real payments.
