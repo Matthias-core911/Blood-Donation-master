@@ -87,14 +87,6 @@ function HomePage() {
 
         <div className="container-page relative grid gap-10 pb-16 pt-32 sm:pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:pb-24 lg:pt-40">
           <div className="reveal-up">
-            <span className="eyebrow inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 text-white/75">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
-                <span className="relative inline-flex size-2 rounded-full bg-primary" />
-              </span>
-              Live across Kenya
-            </span>
-
             <h1 className="display-xl mt-6 text-white">
               Someone nearby
               <br />
@@ -374,3 +366,5 @@ function HomePage() {
     </>
   );
 }
+
+
